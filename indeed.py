@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 
 LIMIT = 50
-URL = "https://www.indeed.com/jobs?q=python&limit={LIMIT}"
+URL = "https://www.indeed.com/jobs?q=python&limit=50"
 
 def extract_indeed_pages():
 	result = requests.get(URL)
@@ -22,19 +22,27 @@ def extract_indeed_pages():
 	return last_page
 
 
+def extract_jobs(html):
+	title = html.find("h2",{"class":"jobTitle"}).find_all('span')[-1].string #title
+	company = html.find("span",{"class":"companyName"}).string
+	location = html.find("div",{"class":"companyLocation"}).text
+	job_id = html
+	return {'title' : title, "company": company, "location" : location}
+
+
 def extract_indeed_jobs(l_page):
 	jobs = []
 	#for page in range(l_page):
 	result = requests.get(f"{URL}&start={0*LIMIT}")
 	soup = BeautifulSoup(result.text, "html.parser")
 	results = soup.find_all("div",{"class":"job_seen_beacon"})
+
 	for result in results:
-		title = result.find("h2",{"class":"jobTitle"})
-		print(title)
-	return jobs
+		job = extract_jobs(result)
+		jobs.append(job)
+	return jobs 
 
 
-extract_indeed_jobs(5)
 
 
 
@@ -46,6 +54,7 @@ def extract_indeed_jobs(last_pages):
 	indeed_result = requests.get(url)
 	soup = BeautifulSoup(result.text, "html,parser")
 	result = soup.find_add("div", {"class":"job_seen_beacon"})
+	jobs.append(job)
 	print(result)
 	return jobs
 
