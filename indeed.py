@@ -23,8 +23,19 @@ def extract_indeed_pages():
 
 
 def extract_indeed_jobs(l_page):
-	for page in range(l_page):
-		print(f"&start={page*LIMIT}")
+	jobs = []
+	#for page in range(l_page):
+	result = requests.get(f"{URL}&start={0*LIMIT}")
+	soup = BeautifulSoup(result.text, "html.parser")
+	results = soup.find_all("div",{"class":"job_seen_beacon"})
+	for result in results:
+		title = result.find("h2",{"class":"jobTitle"})
+		print(title)
+	return jobs
+
+
+extract_indeed_jobs(5)
+
 
 
 '''
