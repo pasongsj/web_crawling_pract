@@ -1,26 +1,28 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
-URL = 'https://www.saramin.co.kr/zf_user/jobs/list/job-category?cat_mcls=2'
+URL = 'https://www.saramin.co.kr/zf_user/jobs/list/job-category?cat_mcls=2&sort=RD'
+LIMIT = 1
+
 def extract_page():
 	result = requests.get(URL)
 
 	soup = BeautifulSoup(result.text, "html.parser")
-
 	pagination = soup.find("div",{"class":"pagination"})
-
 	link = pagination.find_all('a')
-
 	pages = []
 
 	for link in link[:-1]:
 		pages.append(int(link.string))
 
 	last_page = pages[-1]
+
 	return last_page
 
 
 def extract_element(html):
+	global LIMIT
 	company = html.find("div",{"class":"company_nm"}).find("a").string
 	title = html.find("div",{"class":"job_tit"}).find("a").string
 	works = []
@@ -31,9 +33,17 @@ def extract_element(html):
 	career = html.find("p",{"class":"career"}).string
 	education = html.find("p",{"class":"education"}).string
 	employment_t = html.find("p",{"class":"employment_type"}).string
-	place = html.find("p",{"class":"work_place"}).string
+	try:
+		place = html.find("p",{"class":"work_place"}).string
+	except Exception as e:
+		place = "None"
 
-	return{"title" : title, "company" : company, "works" : works, "career" : career, "education" : education, "employment_type": employment_t, "work_place" : place} 
+	lim = html.find("span",{"class":"reg_date"}).string
+#	print(lim)
+	if(lim == '(1일 전 등록)'):
+		LIMIT = 0
+
+	return[title,  company,  works,  career,  education,  employment_t,  place]
 
 
 def extract_info(last_p):
@@ -46,18 +56,25 @@ def extract_info(last_p):
 	infos= soup.find_all("div", {"class":"list_item"})
 
 	for info in infos:
-		job =extract_element(info)
+		job = extract_element(info)
 		jobs.append(job)
-		print(job)
-		print("\n\n")
+	#	print(job)
+	#	print("\n")
+		
 	return jobs
 
 
+def main():
+	global LIMIT
+	a_jobs = []
+	i = 2
+	while(LIMIT):
+		a_jobs.extend(extract_info(i))
+		i = i+1
 
-e_pages = extract_page()
-for i in range(1, e_pages):
-	a_jobs = extract_info(i)
+#	dataA = pd.DataFrame(a_jobs)
+#	print(dataA)
 
 
-
+main()
 
