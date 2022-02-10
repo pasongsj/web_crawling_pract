@@ -33,30 +33,22 @@ def extract_jobs(html):
 def extract_indeed_jobs(l_page):
 	jobs = []
 	#for page in range(l_page):
-	result = requests.get(f"{URL}&start={0*LIMIT}")
+	result = requests.get(f"{URL}&start={l_page*LIMIT}")
 	soup = BeautifulSoup(result.text, "html.parser")
 	results = soup.find_all("div",{"class":"job_seen_beacon"})
 
 	for result in results:
 		job = extract_jobs(result)
 		jobs.append(job)
+		print(job)
+		
 	return jobs 
 
+f_page = extract_indeed_pages()
+for i in range(1,f_page+1):
+	ajobs = extract_indeed_jobs(i)
+	
 
 
 
 
-'''
-#print(max_pages)
-
-def extract_indeed_jobs(last_pages):
-	url = "https://kr.indeed.com/%EC%B7%A8%EC%97%85?as_and=python&as_phr&as_any&as_not&as_ttl&as_cmp&jt=all&st&salary&radius=25&l&fromage=any&limit=50&sort&psf=advsrch&from=advancedsearch&vjk=1654acb6db3db1e0"
-	indeed_result = requests.get(url)
-	soup = BeautifulSoup(result.text, "html,parser")
-	result = soup.find_add("div", {"class":"job_seen_beacon"})
-	jobs.append(job)
-	print(result)
-	return jobs
-
-extract_indeed_jobs(1)
-'''
